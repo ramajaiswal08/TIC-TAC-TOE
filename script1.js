@@ -13,11 +13,11 @@ const CIRC = 131.9; // 2πr, r=21
 class SoundManager {
   #muted = false;
   #sounds = {
-    place:  new Audio('ting.mp3'),
-    tick:   new Audio('ting.mp3'),
+    place: new Audio('ting.mp3'),
+    tick: new Audio('ting.mp3'),
     record: new Audio('ting.mp3'),
-    win:    new Audio('gameover.mp3'),
-    draw:   new Audio('gameover.mp3'),
+    win: new Audio('gameover.mp3'),
+    draw: new Audio('gameover.mp3'),
   };
 
   play(type) {
@@ -25,7 +25,7 @@ class SoundManager {
     const snd = this.#sounds[type];
     if (!snd) return;
     snd.currentTime = 0;
-    snd.play().catch(() => {});
+    snd.play().catch(() => { });
   }
 
   toggleMute() {
@@ -35,63 +35,7 @@ class SoundManager {
 }
 
 
-//  Confetti
-class Confetti {
-  #canvas;
-  #ctx;
-  #particles = [];
-  #raf = null;
-  #colors = ['#d4411e', '#2563a8', '#2a7a4b', '#c07a1a', '#1a1916', '#8b5cf6'];
 
-  constructor(canvasId) {
-    this.#canvas = document.getElementById(canvasId);
-    this.#ctx    = this.#canvas.getContext('2d');
-  }
-
-  start() {
-    this.#canvas.width  = window.innerWidth;
-    this.#canvas.height = window.innerHeight;
-    this.#particles = Array.from({ length: 60 }, () => ({
-      x:     Math.random() * this.#canvas.width,
-      y:     -20,
-      vx:    (Math.random() - 0.5) * 4,
-      vy:    2 + Math.random() * 3.5,
-      size:  5 + Math.random() * 7,
-      col:   this.#colors[Math.floor(Math.random() * this.#colors.length)],
-      angle: Math.random() * 360,
-      spin:  (Math.random() - 0.5) * 6,
-      alpha: 1,
-    }));
-    cancelAnimationFrame(this.#raf);
-    this.#loop();
-  }
-
-  stop() {
-    cancelAnimationFrame(this.#raf);
-    this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
-  }
-
-  #loop() {
-    const { width, height } = this.#canvas;
-    this.#ctx.clearRect(0, 0, width, height);
-    for (const p of this.#particles) {
-      p.x += p.vx; p.y += p.vy; p.angle += p.spin; p.alpha -= 0.007;
-      this.#ctx.save();
-      this.#ctx.globalAlpha = Math.max(0, p.alpha);
-      this.#ctx.translate(p.x, p.y);
-      this.#ctx.rotate((p.angle * Math.PI) / 180);
-      this.#ctx.fillStyle = p.col;
-      this.#ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
-      this.#ctx.restore();
-    }
-    this.#particles = this.#particles.filter(p => p.alpha > 0 && p.y < height + 30);
-    if (this.#particles.length) {
-      this.#raf = requestAnimationFrame(() => this.#loop());
-    } else {
-      this.#ctx.clearRect(0, 0, width, height);
-    }
-  }
-}
 
 //  Timer
 class Timer {
@@ -102,7 +46,7 @@ class Timer {
 
   constructor({ onTimeout, sound }) {
     this.#onTimeout = onTimeout;
-    this.#sound     = sound;
+    this.#sound = sound;
   }
 
   start() {
@@ -118,13 +62,13 @@ class Timer {
   }
 
   reset() { this.start(); }
-  stop()  { clearInterval(this.#intervalId); }
+  stop() { clearInterval(this.#intervalId); }
 
   #render() {
     const offset = CIRC * (1 - this.#seconds / 10);
-    const col    = this.#seconds <= 3 ? '#d4411e'
-                 : this.#seconds <= 5 ? '#c07a1a'
-                 : '#2a7a4b';
+    const col = this.#seconds <= 3 ? '#d4411e'
+      : this.#seconds <= 5 ? '#c07a1a'
+        : '#2a7a4b';
     const ring = document.getElementById('timerRing');
     ring.setAttribute('stroke-dashoffset', offset);
     ring.setAttribute('stroke', col);
@@ -153,8 +97,8 @@ class Leaderboard {
 
   add(seconds, difficulty) {
     const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-    const entry   = { time: parseFloat(seconds), diff: difficulty, date: dateStr };
-    const arr     = this.#load();
+    const entry = { time: parseFloat(seconds), diff: difficulty, date: dateStr };
+    const arr = this.#load();
     arr.push(entry);
     arr.sort((a, b) => a.time - b.time);
     const trimmed = arr.slice(0, this.#max);
@@ -176,7 +120,7 @@ class Leaderboard {
   clear() { localStorage.removeItem(this.#key); }
 
   render(newEntryTime) {
-    const arr       = this.#load();
+    const arr = this.#load();
     const container = document.getElementById('lbList');
     if (!arr.length) {
       container.innerHTML = '<div class="lb-empty">No wins yet — play to set a record!</div>';
@@ -184,8 +128,8 @@ class Leaderboard {
     }
     container.innerHTML = arr.map((e, i) => {
       const rankClass = i < 3 ? ` rank-${i + 1}` : '';
-      const isNew     = newEntryTime && e.time === parseFloat(newEntryTime) ? ' new-entry' : '';
-      const medal     = this.#medals[i] || '';
+      const isNew = newEntryTime && e.time === parseFloat(newEntryTime) ? ' new-entry' : '';
+      const medal = this.#medals[i] || '';
       return `<div class="lb-row${rankClass}${isNew}" style="animation-delay:${i * 0.06}s">
         <span class="lb-medal">${medal}</span>
         ${!medal ? `<span class="lb-rank">${i + 1}</span>` : ''}
@@ -203,13 +147,13 @@ class Leaderboard {
 }
 //  AI
 class AI {
-  #cpuSym     = 'O';
-  #playerSym  = 'X';
+  #cpuSym = 'O';
+  #playerSym = 'X';
   #difficulty = 'medium';
 
   configure({ cpuSym, playerSym, difficulty }) {
-    this.#cpuSym     = cpuSym;
-    this.#playerSym  = playerSym;
+    this.#cpuSym = cpuSym;
+    this.#playerSym = playerSym;
     this.#difficulty = difficulty;
   }
 
@@ -217,11 +161,11 @@ class AI {
     const empty = board.map((v, i) => v === '' ? i : -1).filter(i => i >= 0);
     if (!empty.length) return -1;
     switch (this.#difficulty) {
-      case 'easy':   return empty[Math.floor(Math.random() * empty.length)];
+      case 'easy': return empty[Math.floor(Math.random() * empty.length)];
       case 'medium': return Math.random() < 0.5
         ? this.#bestMove(board)
         : empty[Math.floor(Math.random() * empty.length)];
-      default:       return this.#bestMove(board);
+      default: return this.#bestMove(board);
     }
   }
 
@@ -272,8 +216,8 @@ class Board {
   #onCellClick;
 
   constructor(boardId, svgId, onCellClick) {
-    this.#el          = document.getElementById(boardId);
-    this.#svg         = document.getElementById(svgId);
+    this.#el = document.getElementById(boardId);
+    this.#svg = document.getElementById(svgId);
     this.#onCellClick = onCellClick;
   }
 
@@ -285,7 +229,7 @@ class Board {
       cell.setAttribute('tabindex', '0');
       cell.setAttribute('aria-label', `Cell ${i + 1}`);
       cell.dataset.i = i;
-      cell.addEventListener('click',   ()  => this.#onCellClick(i));
+      cell.addEventListener('click', () => this.#onCellClick(i));
       cell.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') this.#onCellClick(i);
       });
@@ -313,16 +257,16 @@ class Board {
   drawWinLine(combo, boardState) {
     this.#svg.innerHTML = '';
     const cells = this.#cells();
-    const br    = this.#el.getBoundingClientRect();
+    const br = this.#el.getBoundingClientRect();
     const center = i => {
       const r = cells[i].getBoundingClientRect();
       return {
-        x: ((r.left - br.left + r.width  / 2) / br.width)  * 420,
-        y: ((r.top  - br.top  + r.height / 2) / br.height) * 420,
+        x: ((r.left - br.left + r.width / 2) / br.width) * 420,
+        y: ((r.top - br.top + r.height / 2) / br.height) * 420,
       };
     };
-    const s   = center(combo[0]);
-    const e   = center(combo[2]);
+    const s = center(combo[0]);
+    const e = center(combo[2]);
     const sym = boardState[combo[0]];
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('x1', s.x); line.setAttribute('y1', s.y);
@@ -357,12 +301,12 @@ class Board {
 class ScoreBoard {
   #scores = { X: 0, O: 0, draw: 0 };
 
-  reset()        { this.#scores = { X: 0, O: 0, draw: 0 }; this.#render(); }
+  reset() { this.#scores = { X: 0, O: 0, draw: 0 }; this.#render(); }
   increment(key) { this.#scores[key]++; this.#render(); }
 
   #render() {
-    document.getElementById('scoreX').textContent    = this.#scores.X;
-    document.getElementById('scoreO').textContent    = this.#scores.O;
+    document.getElementById('scoreX').textContent = this.#scores.X;
+    document.getElementById('scoreO').textContent = this.#scores.O;
     document.getElementById('scoreDraw').textContent = this.#scores.draw;
   }
 }
@@ -370,23 +314,21 @@ class ScoreBoard {
 //  Modal
 class Modal {
   #el;
-  #onClose;
 
-  constructor(modalId, onClose) {
-    this.#el      = document.getElementById(modalId);
-    this.#onClose = onClose;
+  constructor(modalId) {
+    this.#el = document.getElementById(modalId);
   }
 
   show({ emoji = '', title = '', subtitle = '', gifKey, isRecord, recordText = '', titleClass = '' } = {}) {
     const gif = document.getElementById('modalGif');
     if (gifKey && GIFS[gifKey]) { gif.src = GIFS[gifKey]; gif.style.display = 'block'; }
-    else                        { gif.style.display = 'none'; }
+    else { gif.style.display = 'none'; }
 
     document.getElementById('modalEmoji').textContent = emoji;
 
     const t = document.getElementById('modalTitle');
     t.textContent = title;
-    t.className   = `modal-title ${titleClass}`;
+    t.className = `modal-title ${titleClass}`;
 
     document.getElementById('modalSub').textContent = subtitle;
 
@@ -397,30 +339,29 @@ class Modal {
     this.#el.classList.add('show');
   }
 
-  hide() { this.#el.classList.remove('show'); this.#onClose(); }
+  hide() { this.#el.classList.remove('show'); }
 }
 
 
 
 //  Game 
 class Game {
-  #sound       = new SoundManager();
-  #confetti    = new Confetti('confetti');
+  #sound = new SoundManager();
   #leaderboard = new Leaderboard();
-  #scoreBoard  = new ScoreBoard();
-  #ai          = new AI();
-  #board       = new Board('board', 'winLineSvg', i => this.#handleCellClick(i));
-  #timer       = new Timer({ onTimeout: () => this.#onTimeout(), sound: this.#sound });
-  #modal       = new Modal('modal', () => this.#confetti.stop());
+  #scoreBoard = new ScoreBoard();
+  #ai = new AI();
+  #board = new Board('board', 'winLineSvg', i => this.#handleCellClick(i));
+  #timer = new Timer({ onTimeout: () => this.#onTimeout(), sound: this.#sound });
+  #modal = new Modal('modal');
 
-  #gameMode   = 'cpu';
+  #gameMode = 'cpu';
   #difficulty = 'medium';
-  #playerSym  = 'X';
-  #cpuSym     = 'O';
+  #playerSym = 'X';
+  #cpuSym = 'O';
   #boardState = Array(9).fill('');
-  #current    = 'X';
+  #current = 'X';
   #gameActive = false;
-  #startTime  = 0;
+  #startTime = 0;
 
   //  Setup 
   setMode(m) {
@@ -440,7 +381,7 @@ class Game {
 
   setSymbol(s) {
     this.#playerSym = s;
-    this.#cpuSym    = s === 'X' ? 'O' : 'X';
+    this.#cpuSym = s === 'X' ? 'O' : 'X';
     document.getElementById('symX').className = `sym-btn${s === 'X' ? ' sel-x' : ''}`;
     document.getElementById('symO').className = `sym-btn${s === 'O' ? ' sel-o' : ''}`;
   }
@@ -474,9 +415,9 @@ class Game {
 
   #newRound() {
     this.#boardState = Array(9).fill('');
-    this.#current    = 'X';
+    this.#current = 'X';
     this.#gameActive = true;
-    this.#startTime  = Date.now();
+    this.#startTime = Date.now();
 
     this.#board.render(this.#boardState);
     this.#board.clearWinLine();
@@ -495,8 +436,8 @@ class Game {
 
   //Moves
   #handleCellClick(i) {
-    if (!this.#gameActive)                                              return;
-    if (this.#boardState[i] !== '')                                     return;
+    if (!this.#gameActive) return;
+    if (this.#boardState[i] !== '') return;
     if (this.#gameMode === 'cpu' && this.#current !== this.#playerSym) return;
     this.#makeMove(i);
   }
@@ -507,7 +448,7 @@ class Game {
     this.#sound.play('place');
 
     const winner = this.#getWinner();
-    if (winner)                                { this.#endGame(winner); return; }
+    if (winner) { this.#endGame(winner); return; }
     if (this.#boardState.every(v => v !== '')) { this.#endGame('draw'); return; }
 
     this.#current = this.#current === 'X' ? 'O' : 'X';
@@ -528,8 +469,8 @@ class Game {
   #getWinner() {
     for (const [a, b, c] of WINS) {
       if (this.#boardState[a] &&
-          this.#boardState[a] === this.#boardState[b] &&
-          this.#boardState[b] === this.#boardState[c]) {
+        this.#boardState[a] === this.#boardState[b] &&
+        this.#boardState[b] === this.#boardState[c]) {
         return { sym: this.#boardState[a], combo: [a, b, c] };
       }
     }
@@ -556,22 +497,22 @@ class Game {
     this.#board.drawWinLine(combo, this.#boardState);
     this.#scoreBoard.increment(sym);
     this.#sound.play('win');
-    this.#confetti.start();
+    party.confetti(document.body);
 
-    const elapsed  = ((Date.now() - this.#startTime) / 1000).toFixed(1);
+    const elapsed = ((Date.now() - this.#startTime) / 1000).toFixed(1);
     const isRecord = this.#leaderboard.saveRecord(elapsed, this.#difficulty);
     if (isRecord) { this.#sound.play('record'); this.#leaderboard.renderBestTime(); }
     this.#leaderboard.render(elapsed);
 
     let who, gifKey, titleClass;
     if (this.#gameMode === 'friend') {
-      who        = sym === 'X' ? 'Player 1 Wins!' : 'Player 2 Wins!';
-      gifKey     = sym === 'X' ? 'p1' : 'p2';
+      who = sym === 'X' ? 'Player 1 Wins!' : 'Player 2 Wins!';
+      gifKey = sym === 'X' ? 'p1' : 'p2';
       titleClass = sym === 'X' ? 'win-x' : 'win-o';
     } else {
       const playerWon = sym === this.#playerSym;
-      who        = playerWon ? 'You Win! 🎉' : 'CPU Wins!';
-      gifKey     = playerWon ? 'win' : 'cpu';
+      who = playerWon ? 'You Win! 🎉' : 'CPU Wins!';
+      gifKey = playerWon ? 'win' : 'cpu';
       titleClass = sym === 'X' ? 'win-x' : 'win-o';
     }
 
@@ -599,11 +540,11 @@ class Game {
   //  Turn UI 
   #updateTurnUI() {
     const badge = document.getElementById('turnBadge');
-    const sym   = document.getElementById('turnSym');
-    const text  = document.getElementById('turnText');
+    const sym = document.getElementById('turnSym');
+    const text = document.getElementById('turnText');
 
     badge.className = `turn-badge ${this.#current === 'X' ? 'x-turn' : 'o-turn'}`;
-    sym.className   = `turn-sym ${this.#current === 'X' ? 'x' : 'o'}`;
+    sym.className = `turn-sym ${this.#current === 'X' ? 'x' : 'o'}`;
     sym.textContent = this.#current === 'X' ? '✕' : '○';
 
     text.textContent = this.#gameMode === 'friend'
@@ -615,8 +556,8 @@ class Game {
   }
 
   // Public surface 
-  closeModal()       { this.#modal.hide(); }
-  toggleMute()       { this.#sound.toggleMute(); }
+  closeModal() { this.#modal.hide(); }
+  toggleMute() { this.#sound.toggleMute(); }
   clearLeaderboard() {
     this.#leaderboard.clear();
     this.#leaderboard.render();
@@ -628,14 +569,14 @@ class Game {
 
 const game = new Game();
 
-window.setMode          = m  => game.setMode(m);
-window.setDiff          = d  => game.setDifficulty(d);
-window.setSymbol        = s  => game.setSymbol(s);
-window.startGame        = () => game.startGame();
-window.restartRound     = () => game.restartRound();
-window.goToMenu         = () => game.goToMenu();
-window.closeModal       = () => game.closeModal();
-window.toggleMute       = () => game.toggleMute();
+window.setMode = m => game.setMode(m);
+window.setDiff = d => game.setDifficulty(d);
+window.setSymbol = s => game.setSymbol(s);
+window.startGame = () => game.startGame();
+window.restartRound = () => game.restartRound();
+window.goToMenu = () => game.goToMenu();
+window.closeModal = () => game.closeModal();
+window.toggleMute = () => game.toggleMute();
 window.clearLeaderboard = () => game.clearLeaderboard();
 
 // Boot defaults (matches your HTML's initial active states)

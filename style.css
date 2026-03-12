@@ -475,8 +475,7 @@ body::before {
   70%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(.95)}
 }
 
-/* ── CONFETTI ── */
-#confetti { position:fixed;inset:0;pointer-events:none;z-index:99; }
+
 
 /* ── SHAKE ── */
 .shake { animation: shakeAnim .5s ease; }

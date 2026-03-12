@@ -1,128 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Tic Tac Toe</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic Tac Toe</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-<canvas id="confetti"></canvas>
-<button id="muteBtn" onclick="toggleMute()">🔊</button>
+  <button id="muteBtn" onclick="toggleMute()">🔊</button>
 
-<!-- START SCREEN -->
-<div class="screen active" id="startScreen">
-  <div class="title-area">
-    <h1><span class="tx">Tic</span> <span class="to">Tac</span> <span class="tx">Toe</span></h1>
+  <!-- START SCREEN -->
+  <div class="screen active" id="startScreen">
+    <div class="title-area">
+      <h1><span class="tx">Tic</span> <span class="to">Tac</span> <span class="tx">Toe</span></h1>
+    </div>
+
+    <div class="card">
+      <div class="label">Game Mode</div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="btnCPU" onclick="setMode('cpu')">vs Computer</button>
+        <button class="toggle-btn" id="btnFriend" onclick="setMode('friend')">vs Friend</button>
+      </div>
+    </div>
+
+    <div class="card" id="diffCard">
+      <div class="label">Difficulty</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" id="dEasy" onclick="setDiff('easy')">Easy</button>
+        <button class="toggle-btn active" id="dMedium" onclick="setDiff('medium')">Medium</button>
+        <button class="toggle-btn" id="dHard" onclick="setDiff('hard')">Hard</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Your Symbol</div>
+      <div class="symbol-pick">
+        <button class="sym-btn sel-x" id="symX" onclick="setSymbol('X')">✕</button>
+        <button class="sym-btn" id="symO" onclick="setSymbol('O')">○</button>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startGame()">Start Game →</button>
   </div>
 
-  <div class="card">
-    <div class="label">Game Mode</div>
-    <div class="toggle-group">
-      <button class="toggle-btn active" id="btnCPU" onclick="setMode('cpu')">vs Computer</button>
-      <button class="toggle-btn" id="btnFriend" onclick="setMode('friend')">vs Friend</button>
+  <!-- GAME SCREEN -->
+  <div class="screen" id="gameScreen">
+    <div class="score-panel">
+      <div class="score-box x-side" id="scoreBoxX">
+        <div class="score-name" id="p1name">Player</div>
+        <div class="score-num" id="scoreX">0</div>
+      </div>
+      <div class="score-box">
+        <div class="score-name">Draw</div>
+        <div class="score-num" id="scoreDraw">0</div>
+      </div>
+      <div class="score-box o-side" id="scoreBoxO">
+        <div class="score-name" id="p2name">CPU</div>
+        <div class="score-num" id="scoreO">0</div>
+      </div>
+    </div>
+
+    <div class="turn-bar">
+      <div class="turn-badge x-turn" id="turnBadge">
+        <span class="turn-sym x" id="turnSym">✕</span>
+        <span class="turn-text" id="turnText">Your turn</span>
+      </div>
+      <div class="timer-wrap">
+        <svg class="timer-svg" viewBox="0 0 50 50">
+          <circle class="timer-bg" cx="25" cy="25" r="21" />
+          <circle class="timer-ring" id="timerRing" cx="25" cy="25" r="21" stroke="#2a7a4b" stroke-dasharray="131.9"
+            stroke-dashoffset="0" />
+        </svg>
+        <div class="timer-num" id="timerNum">10</div>
+      </div>
+    </div>
+
+    <div class="record-bar">
+      <span>Best time:</span>
+      <span class="record-val" id="recordDisplay">--</span>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+      <svg class="win-line-svg" id="winLineSvg" viewBox="0 0 420 420" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" onclick="restartRound()">↺ Restart</button>
+      <button class="btn" onclick="goToMenu()">← Menu</button>
+    </div>
+
+    <div class="lb-card">
+      <div class="lb-header">
+        <div class="lb-title">Top 5 Fastest Wins</div>
+        <button class="lb-clear" onclick="clearLeaderboard()">Clear</button>
+      </div>
+      <div id="lbList">
+        <div class="lb-empty">No wins yet — play to set a record!</div>
+      </div>
     </div>
   </div>
 
-  <div class="card" id="diffCard">
-    <div class="label">Difficulty</div>
-    <div class="toggle-group">
-      <button class="toggle-btn" id="dEasy" onclick="setDiff('easy')">Easy</button>
-      <button class="toggle-btn active" id="dMedium" onclick="setDiff('medium')">Medium</button>
-      <button class="toggle-btn" id="dHard" onclick="setDiff('hard')">Hard</button>
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <img class="result-gif" id="modalGif" src="" alt="result" />
+      <span class="modal-emoji" id="modalEmoji">🏆</span>
+      <div class="modal-title" id="modalTitle">Player Wins!</div>
+      <div class="modal-sub" id="modalSub">Great game!</div>
+      <div class="modal-record" id="modalRecord">🏅 New record!</div>
+      <div class="modal-btns">
+        <button class="btn primary" onclick="closeModal();restartRound()">Play Again</button>
+        <button class="btn" onclick="closeModal();goToMenu()">Settings</button>
+      </div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="label">Your Symbol</div>
-    <div class="symbol-pick">
-      <button class="sym-btn sel-x" id="symX" onclick="setSymbol('X')">✕</button>
-      <button class="sym-btn" id="symO" onclick="setSymbol('O')">○</button>
-    </div>
+  <!-- Timeout Flash -->
+  <div class="timeout-flash" id="timeoutFlash">
+    <span class="timeout-text">⏰ Time's up!</span>
   </div>
 
-  <button class="start-btn" onclick="startGame()">Start Game →</button>
-</div>
-
-<!-- GAME SCREEN -->
-<div class="screen" id="gameScreen">
-  <div class="score-panel">
-    <div class="score-box x-side" id="scoreBoxX">
-      <div class="score-name" id="p1name">Player</div>
-      <div class="score-num" id="scoreX">0</div>
-    </div>
-    <div class="score-box">
-      <div class="score-name">Draw</div>
-      <div class="score-num" id="scoreDraw">0</div>
-    </div>
-    <div class="score-box o-side" id="scoreBoxO">
-      <div class="score-name" id="p2name">CPU</div>
-      <div class="score-num" id="scoreO">0</div>
-    </div>
-  </div>
-
-  <div class="turn-bar">
-    <div class="turn-badge x-turn" id="turnBadge">
-      <span class="turn-sym x" id="turnSym">✕</span>
-      <span class="turn-text" id="turnText">Your turn</span>
-    </div>
-    <div class="timer-wrap">
-      <svg class="timer-svg" viewBox="0 0 50 50">
-        <circle class="timer-bg" cx="25" cy="25" r="21"/>
-        <circle class="timer-ring" id="timerRing" cx="25" cy="25" r="21"
-          stroke="#2a7a4b" stroke-dasharray="131.9" stroke-dashoffset="0"/>
-      </svg>
-      <div class="timer-num" id="timerNum">10</div>
-    </div>
-  </div>
-
-  <div class="record-bar">
-    <span>Best time:</span>
-    <span class="record-val" id="recordDisplay">--</span>
-  </div>
-
-  <div class="board-wrap">
-    <div class="board" id="board"></div>
-    <svg class="win-line-svg" id="winLineSvg" viewBox="0 0 420 420" preserveAspectRatio="none"></svg>
-  </div>
-
-  <div class="btn-row">
-    <button class="btn primary" onclick="restartRound()">↺ Restart</button>
-    <button class="btn" onclick="goToMenu()">← Menu</button>
-  </div>
-
-  <div class="lb-card">
-    <div class="lb-header">
-      <div class="lb-title">Top 5 Fastest Wins</div>
-      <button class="lb-clear" onclick="clearLeaderboard()">Clear</button>
-    </div>
-    <div id="lbList"><div class="lb-empty">No wins yet — play to set a record!</div></div>
-  </div>
-</div>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <img class="result-gif" id="modalGif" src="" alt="result"/>
-    <span class="modal-emoji" id="modalEmoji">🏆</span>
-    <div class="modal-title" id="modalTitle">Player Wins!</div>
-    <div class="modal-sub" id="modalSub">Great game!</div>
-    <div class="modal-record" id="modalRecord">🏅 New record!</div>
-    <div class="modal-btns">
-      <button class="btn primary" onclick="closeModal();restartRound()">Play Again</button>
-      <button class="btn" onclick="closeModal();goToMenu()">Settings</button>
-    </div>
-  </div>
-</div>
-
-<!-- Timeout Flash -->
-<div class="timeout-flash" id="timeoutFlash">
-  <span class="timeout-text">⏰ Time's up!</span>
-</div>
-
-<script src="script1.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/party-js@latest/bundle/party.min.js"></script>
+  <script src="script1.js"></script>
 
 
 </body>
+
 </html>
