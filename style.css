@@ -448,8 +448,8 @@ body::before {
   height: 100px;
   border-radius: 12px;
   object-fit: cover;
-  margin: 0 auto 12px auto;   /* centers horizontally */
-  display: block;             /* required for margin auto to work */
+  margin: 0 auto 12px auto;   
+  display: block;            
   border: 1px solid var(--border);
 }
 /* ── TIMEOUT FLASH ── */
